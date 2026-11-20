@@ -26,6 +26,7 @@ import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
 
 import javax.swing.undo.AbstractUndoableEdit;
 import javax.swing.undo.CannotRedoException;
@@ -53,7 +54,7 @@ public class HomeFurnitureController implements Controller {
    * The properties that may be edited by the view associated to this controller. 
    */
   public enum Property {ICON, NAME, NAME_VISIBLE, DESCRIPTION, PRICE, X, Y, ELEVATION, ANGLE_IN_DEGREES, BASE_PLAN_ITEM, 
-      WIDTH, DEPTH,  HEIGHT, PROPORTIONAL, COLOR, PAINT, SHININESS, VISIBLE, MODEL_MIRRORED, LIGHT_POWER, 
+      WIDTH, DEPTH, HEIGHT, VOLUME, PROPORTIONAL, COLOR, PAINT, SHININESS, VISIBLE, MODEL_MIRRORED, LIGHT_POWER,
       RESIZABLE, DEFORMABLE, TEXTURABLE}
   
   /**
@@ -91,6 +92,7 @@ public class HomeFurnitureController implements Controller {
   private Float              depth;
   private Float              proportionalDepth;
   private Float              height;
+  private Float              volume;
   private Float              proportionalHeight;
   private boolean            proportional;
   private Integer            color;
@@ -856,6 +858,7 @@ public class HomeFurnitureController implements Controller {
       Float oldWidth = this.width;
       this.width = adjustedWidth;
       this.propertyChangeSupport.firePropertyChange(Property.WIDTH.name(), oldWidth, adjustedWidth);
+      this.updateVolume(this.height ,  this.width ,  this.depth);
       if (oldWidth != null && adjustedWidth != null && updateDepthAndHeight) {
         float ratio = adjustedWidth / oldWidth;
         if (this.proportionalDepth != null) {
@@ -896,6 +899,7 @@ public class HomeFurnitureController implements Controller {
       Float oldDepth = this.depth;
       this.depth = adjustedDepth;
       this.propertyChangeSupport.firePropertyChange(Property.DEPTH.name(), oldDepth, adjustedDepth);
+      this.updateVolume(this.height ,  this.width ,  this.depth);
       if (oldDepth != null && adjustedDepth != null && updateWidthAndHeight) {
         float ratio = adjustedDepth / oldDepth;
         if (this.proportionalWidth != null) {
@@ -936,6 +940,7 @@ public class HomeFurnitureController implements Controller {
       Float oldHeight = this.height;
       this.height = adjustedHeight;
       this.propertyChangeSupport.firePropertyChange(Property.HEIGHT.name(), oldHeight, adjustedHeight);
+      this.updateVolume(this.height ,  this.width ,  this.depth);
       if (oldHeight != null && adjustedHeight != null && updateWidthAndDepth) {
         float ratio = adjustedHeight / oldHeight;
         if (this.proportionalWidth != null) {
@@ -953,6 +958,39 @@ public class HomeFurnitureController implements Controller {
    */
   public Float getHeight() {
     return this.height;
+  }
+
+  /**
+   * Returns the edited volume.
+   */
+  public Float getVolume() {
+    return this.volume;
+  }
+
+  /**
+   * Sets the volume.
+   */
+  public void setVolume(Float volume) {
+    if (!Objects.equals(volume, this.volume)) {
+      Float oldVolume = this.volume;
+      this.volume = volume;
+      this.propertyChangeSupport.firePropertyChange(
+              Property.VOLUME.name(), oldVolume, volume);
+    }
+  }
+
+  /**
+   * Updates the volume.
+   */
+
+  private void updateVolume(Float height, Float width, Float depth) {
+    if (height != null
+            && depth != null
+            && width != null) {
+      setVolume(height * depth * width);
+    } else {
+      setVolume(null);
+    }
   }
   
   /**
